@@ -85,7 +85,16 @@ def answer_question(user_query: str) -> dict:
     best = matches[0]
     best_score = best.get("score", 0.0) if isinstance(best, dict) else getattr(best, "score", 0.0)
     best_md = best.get("metadata", {}) if isinstance(best, dict) else getattr(best, "metadata", {}) or {}
-    best_url = best_md.get("url") or best_md.get("source") or None
+    best_md = best.get("metadata", {}) if isinstance(best, dict) else best.metadata
+best_url = (
+    best_md.get("url") or 
+    best_md.get("source") or 
+    best_md.get("source_url") or
+    best_md.get("page_url") or
+    best_md.get("link") or
+    None
+)
+
 
     # 4) build context
     chunks = []
