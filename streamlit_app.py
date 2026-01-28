@@ -1,13 +1,18 @@
 import streamlit as st
 from rag_engine import answer_question
 
-# Page config (page_icon can be an emoji or image path; logo.png works if present in repo)
-st.set_page_config(page_title="The Tech Thinker AI", page_icon="logo.png", layout="centered")
+# Page Config
+st.set_page_config(
+    page_title="The Tech Thinker AI",
+    page_icon="logo.png",
+    layout="centered"
+)
 
 # ---------- INLINE HEADER ----------
 col1, col2 = st.columns([1, 6])
 with col1:
     st.image("logo.png", width=55)
+
 with col2:
     st.markdown(
         """
@@ -17,9 +22,9 @@ with col2:
         unsafe_allow_html=True
     )
 
-# ---------- CUSTOM AVATARS ----------
+# ---------- ONLY BOT AVATAR ----------
 BOT_AVATAR = "logo.png"
-USER_AVATAR = "logo.png"  # change to None if you want default user icon
+USER_AVATAR = None   # <--- Streamlit default user icon
 
 # ---------- SESSION ----------
 if "messages" not in st.session_state:
@@ -27,7 +32,7 @@ if "messages" not in st.session_state:
         {"role": "assistant", "content": "Hi machi 👋 Ask me anything from The Tech Thinker content!"}
     ]
 
-# ---------- RENDER CHAT HISTORY (WITH AVATARS) ----------
+# ---------- RENDER CHAT HISTORY ----------
 for m in st.session_state.messages:
     avatar = BOT_AVATAR if m["role"] == "assistant" else USER_AVATAR
     with st.chat_message(m["role"], avatar=avatar):
@@ -51,7 +56,7 @@ if q:
 
                 st.markdown(ans)
 
-                # ✅ Only show Source (NO Confidence)
+                # Show ONLY source (no confidence)
                 if src:
                     st.caption(f"**Source:** {src}")
 
