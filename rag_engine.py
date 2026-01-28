@@ -5,40 +5,40 @@ from pinecone import Pinecone
 
 EMBED_MODEL = "text-embedding-3-small"
 GEN_MODEL = "gpt-4o-mini"
-NAMESPACE = "ttt_v2"
-
 
 
 def _get_secret(name: str) -> str:
     # Streamlit Cloud secrets
     if name in st.secrets:
-        return st.secrets[name]
+        return str(st.secrets[name])
     # fallback (local)
     return os.environ.get(name, "")
 
 
 @st.cache_resource
 def _clients():
-    openai_key = _get_secret("OPENAI_API_KEY")
-    pinecone_key = _get_secret("PINECONE_API_KEY")
-    index_name = _get_secret("PINECONE_INDEX")
-    host = _get_secret("PINECONE_HOST")
-    namespace = _get_secret("PINECONE_NAMESPACE")  # <-- NEW (ttt_v2)
+    openai_key = _get_secret("OPENAI_API_KEY").strip()
+    pinecone_key = _get_secret("PINECONE_API_KEY").strip()
+    index_name = _get_secret("PINECONE_INDEX").strip()
+    host = _get_secret("PINECONE_HOST").strip()
+    namespace = _get_secret("PINECONE_NAMESPACE").strip()
 
     if not openai_key:
         raise RuntimeError("Missing OPENAI_API_KEY in Streamlit Secrets.")
     if not pinecone_key:
         raise RuntimeError("Missing PINECONE_API_KEY in Streamlit Secrets.")
     if not index_name:
-        raise RuntimeError("Missing PINECONE_INDEX in Streamlit Secrets.")
+        raise RuntimeError("Missing PINECONE_INDEX in Streamlit Secrets (example: techthinker-rag).")
     if not namespace:
         raise RuntimeError("Missing PINECONE_NAMESPACE in Streamlit Secrets (example: ttt_v2).")
+    if not host:
+        raise RuntimeError("Missing PINECONE_HOST in Streamlit Secrets (copy Host from Pinecone dashboard).")
 
     oai = OpenAI(api_key=openai_key)
     pc = Pinecone(api_key=pinecone_key)
 
-    # Serverless: host is recommended
-    idx = pc.Index(index_name, host=host) if host else pc.Index(index_name)
+    # Serverless: host is required/recommended
+    idx = pc.Index(index_name, host=host)
 
     return oai, idx, namespace
 
@@ -52,6 +52,10 @@ def answer_question(user_query: str) -> dict:
         "confidence": 0.0-1.0 (Pinecone score)
       }
     """
+    user_query = (user_query or "").strip()
+    if not user_query:
+        return {"answer": "Please type a question.", "source_url": None, "confidence": 0.0}
+
     oai, index, namespace = _clients()
 
     # 1) embed query
@@ -68,7 +72,7 @@ def answer_question(user_query: str) -> dict:
         namespace=namespace
     )
 
-    matches = res.get("matches", []) if isinstance(res, dict) else res.matches
+    matches = res.get("matches", []) if isinstance(res, dict) else getattr(res, "matches", [])
 
     if not matches:
         return {
@@ -77,25 +81,26 @@ def answer_question(user_query: str) -> dict:
             "confidence": 0.0
         }
 
-    # 3) build context + pick best URL
+    # 3) best match + URL + score
     best = matches[0]
-    best_score = best.get("score", 0.0) if isinstance(best, dict) else best.score
-    best_md = best.get("metadata", {}) if isinstance(best, dict) else best.metadata
+    best_score = best.get("score", 0.0) if isinstance(best, dict) else getattr(best, "score", 0.0)
+    best_md = best.get("metadata", {}) if isinstance(best, dict) else getattr(best, "metadata", {}) or {}
     best_url = best_md.get("url") or best_md.get("source") or None
 
+    # 4) build context
     chunks = []
     for m in matches[:4]:
-        md = m.get("metadata", {}) if isinstance(m, dict) else m.metadata
+        md = m.get("metadata", {}) if isinstance(m, dict) else getattr(m, "metadata", {}) or {}
         txt = md.get("text") or md.get("chunk") or ""
         if txt:
             chunks.append(txt.strip())
 
     context = "\n\n---\n\n".join(chunks)
 
-    # 4) generate (grounded)
+    # 5) generate (grounded)
     prompt = f"""
 You are The Tech Thinker AI.
-Answer ONLY from the CONTEXT.
+Answer ONLY from the CONTEXT below.
 If the context is insufficient, say you don't know and suggest what to check.
 
 CONTEXT:
