@@ -29,10 +29,10 @@ def _clients():
         raise RuntimeError("Missing PINECONE_API_KEY in Streamlit Secrets.")
     if not index_name:
         raise RuntimeError("Missing PINECONE_INDEX in Streamlit Secrets (example: techthinker-rag).")
-    if not namespace:
-        raise RuntimeError("Missing PINECONE_NAMESPACE in Streamlit Secrets (example: ttt_v2).")
     if not host:
         raise RuntimeError("Missing PINECONE_HOST in Streamlit Secrets (copy Host from Pinecone dashboard).")
+    if not namespace:
+        raise RuntimeError("Missing PINECONE_NAMESPACE in Streamlit Secrets (example: ttt_v2).")
 
     oai = OpenAI(api_key=openai_key)
     pc = Pinecone(api_key=pinecone_key)
@@ -84,17 +84,17 @@ def answer_question(user_query: str) -> dict:
     # 3) best match + URL + score
     best = matches[0]
     best_score = best.get("score", 0.0) if isinstance(best, dict) else getattr(best, "score", 0.0)
-    best_md = best.get("metadata", {}) if isinstance(best, dict) else getattr(best, "metadata", {}) or {}
-    best_md = best.get("metadata", {}) if isinstance(best, dict) else best.metadata
-best_url = (
-    best_md.get("url") or 
-    best_md.get("source") or 
-    best_md.get("source_url") or
-    best_md.get("page_url") or
-    best_md.get("link") or
-    None
-)
 
+    best_md = best.get("metadata", {}) if isinstance(best, dict) else getattr(best, "metadata", {}) or {}
+
+    best_url = (
+        best_md.get("url")
+        or best_md.get("source")
+        or best_md.get("source_url")
+        or best_md.get("page_url")
+        or best_md.get("link")
+        or None
+    )
 
     # 4) build context
     chunks = []
