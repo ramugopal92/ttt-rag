@@ -29,9 +29,9 @@ if logo_base64:
         f"""
         <div style="text-align:center; margin-top:-20px; margin-bottom:5px;">
             <img src="data:image/png;base64,{logo_base64}" width="70" />
-            <h1 style="margin-bottom:0px; font-size:42px;">The Tech Thinker AI</h1>
+            <h1 style="margin-bottom:0px; font-size:42px;">The Tech Thinker AI Assistant</h1>
             <p style="margin-top:-8px; color:gray; font-size:16px;">
-                Powered by <b>The Tech Thinker</b>
+                Powered by <b>TheTechThinker.com</b>
             </p>
         </div>
         """,
