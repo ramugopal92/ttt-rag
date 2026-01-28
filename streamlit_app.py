@@ -3,8 +3,11 @@ from rag_engine import answer_question
 
 st.set_page_config(page_title="The Tech Thinker AI", page_icon="🤖", layout="centered")
 
-st.title("🤖 The Tech Thinker AI (RAG Demo)")
-st.caption("Validated ✅ | Website rollout coming soon")
+# Branding Header
+st.image("logo.png", width=65)  
+st.title("The Tech Thinker AI (RAG Demo)")
+st.caption("Powered by The Tech Thinker • RAG + GPT-4o-mini")
+
 
 if "messages" not in st.session_state:
     st.session_state.messages = [
