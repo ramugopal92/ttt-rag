@@ -8,13 +8,13 @@ st.set_page_config(page_title="The Tech Thinker AI", page_icon="logo.png", layou
 col1, col2 = st.columns([1, 6])  # adjust ratio if needed
 
 with col1:
-    st.image("logo.png", width=55)  # your logo
+    st.image("logo.png", width=65)  # your logo
 
 with col2:
     st.markdown(
         """
         <h1 style='margin-bottom:0px;'>The Tech Thinker AI</h1>
-        <p style='margin-top:-10px; color:gray;'>Powered by The Tech Thinker • RAG + GPT-4o-mini</p>
+        <p style='margin-top:-10px; color:gray;'>Powered by The Tech Thinker</p>
         """,
         unsafe_allow_html=True
     )
