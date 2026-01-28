@@ -5,6 +5,8 @@ from pinecone import Pinecone
 
 EMBED_MODEL = "text-embedding-3-small"
 GEN_MODEL = "gpt-4o-mini"
+NAMESPACE = "ttt_v2"
+
 
 
 def _get_secret(name: str) -> str:
