@@ -8,7 +8,7 @@ st.caption("Validated ✅ | Website rollout coming soon")
 
 if "messages" not in st.session_state:
     st.session_state.messages = [
-        {"role": "assistant", "content": "Hi machi 👋 Ask me anything from The Tech Thinker content!"}
+        {"role": "assistant", "content": "Hi there 👋 Ask me anything from The Tech Thinker Platform!"}
     ]
 
 for m in st.session_state.messages:
