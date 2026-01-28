@@ -1,11 +1,11 @@
 import streamlit as st
 from rag_engine import answer_question
 
-st.set_page_config(page_title="The Tech Thinker AI", page_icon="🤖", layout="centered")
+st.set_page_config(page_title="The Tech Thinker AI", page_icon="logo.png", layout="centered")
 
 # Branding Header
 st.image("logo.png", width=65)  
-st.title("The Tech Thinker AI (RAG Demo)")
+st.title("The Tech Thinker AI")
 st.caption("Powered by The Tech Thinker • RAG + GPT-4o-mini")
 
 
