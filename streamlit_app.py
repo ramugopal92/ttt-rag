@@ -3,22 +3,16 @@ from rag_engine import answer_question
 
 st.set_page_config(page_title="The Tech Thinker AI", page_icon="logo.png", layout="centered")
 
-# Branding Header
-# ========= Inline Logo + Title =========
-col1, col2 = st.columns([1, 6])  # adjust ratio if needed
+col1, col2 = st.columns([1, 6])
 
 with col1:
-    st.image("logo.png", width=65)  # your logo
+    st.image("logo.png", width=55)
 
 with col2:
-    st.markdown(
-        """
+    st.markdown("""
         <h1 style='margin-bottom:0px;'>The Tech Thinker AI</h1>
         <p style='margin-top:-10px; color:gray;'>Powered by The Tech Thinker</p>
-        """,
-        unsafe_allow_html=True
-    )
-
+    """, unsafe_allow_html=True)
 
 
 if "messages" not in st.session_state:
