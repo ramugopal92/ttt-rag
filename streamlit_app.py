@@ -48,7 +48,7 @@ USER_AVATAR = None  # keep default user icon
 
 if "messages" not in st.session_state:
     st.session_state.messages = [
-        {"role": "assistant", "content": "Hi machi 👋 Ask me anything from The Tech Thinker content!"}
+        {"role": "assistant", "content": "Hi there 👋 Ask me anything from The Tech Thinker platform!"}
     ]
 
 for m in st.session_state.messages:
