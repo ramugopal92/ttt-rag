@@ -1,4 +1,5 @@
 import streamlit as st
+from rag_engine import answer_question
 
 st.set_page_config(page_title="The Tech Thinker AI", page_icon="🤖", layout="centered")
 
@@ -20,9 +21,25 @@ if q:
     with st.chat_message("user"):
         st.markdown(q)
 
-    # TEMP reply (we will connect your RAG logic in next step)
-    temp_answer = "Demo UI is ready ✅ Next step: connect Pinecone + OpenAI RAG engine."
     with st.chat_message("assistant"):
-        st.markdown(temp_answer)
+        with st.spinner("Thinking..."):
+            try:
+                r = answer_question(q)
+                ans = r.get("answer", "No answer returned.")
+                src = r.get("source_url")
+                conf = r.get("confidence", None)
 
-    st.session_state.messages.append({"role": "assistant", "content": temp_answer})
+                st.markdown(ans)
+
+                meta = []
+                if conf is not None:
+                    meta.append(f"**Confidence:** {conf:.2f}")
+                if src:
+                    meta.append(f"**Source:** {src}")
+                if meta:
+                    st.caption(" • ".join(meta))
+
+            except Exception as e:
+                st.error(f"Error: {e}")
+
+    st.session_state.messages.append({"role": "assistant", "content": ans if 'ans' in locals() else "Error"})
