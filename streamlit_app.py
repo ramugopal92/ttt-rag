@@ -1,52 +1,49 @@
 import streamlit as st
 from rag_engine import answer_question
 
-# Page Config
 st.set_page_config(
     page_title="The Tech Thinker AI",
     page_icon="logo.png",
     layout="centered"
 )
 
-# ---------- INLINE HEADER ----------
-col1, col2 = st.columns([1, 6])
-with col1:
-    st.image("logo.png", width=55)
+# ---------------------- CENTERED HEADER ----------------------
+st.markdown(
+    """
+    <div style="text-align:center; margin-top:-20px; margin-bottom:10px;">
+        <img src="logo.png" width="70" style="margin-bottom:-10px;" />
+        <h1 style="margin-bottom:0px; font-size:42px;">The Tech Thinker AI</h1>
+        <p style="margin-top:-8px; color:gray; font-size:16px;">
+            Powered by <b>The Tech Thinker</b>
+        </p>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
 
-with col2:
-    st.markdown(
-        """
-        <h1 style='margin-bottom:0px;'>The Tech Thinker AI</h1>
-        <p style='margin-top:-10px; color:gray;'>Powered by The Tech Thinker</p>
-        """,
-        unsafe_allow_html=True
-    )
-
-# ---------- ONLY BOT AVATAR ----------
+# ---------------- BOT AVATAR ONLY ----------------
 BOT_AVATAR = "logo.png"
-USER_AVATAR = None   # <--- Streamlit default user icon
+USER_AVATAR = None  # default Streamlit user icon
 
-# ---------- SESSION ----------
+# ---------------- SESSION ----------------
 if "messages" not in st.session_state:
     st.session_state.messages = [
         {"role": "assistant", "content": "Hi machi 👋 Ask me anything from The Tech Thinker content!"}
     ]
 
-# ---------- RENDER CHAT HISTORY ----------
+# ---------------- SHOW CHAT HISTORY ----------------
 for m in st.session_state.messages:
     avatar = BOT_AVATAR if m["role"] == "assistant" else USER_AVATAR
     with st.chat_message(m["role"], avatar=avatar):
         st.markdown(m["content"])
 
-# ---------- INPUT ----------
+# ---------------- USER INPUT ----------------
 q = st.chat_input("Ask a question...")
 if q:
-    # user message
     st.session_state.messages.append({"role": "user", "content": q})
     with st.chat_message("user", avatar=USER_AVATAR):
         st.markdown(q)
 
-    # assistant response
     with st.chat_message("assistant", avatar=BOT_AVATAR):
         with st.spinner("Thinking..."):
             try:
@@ -56,12 +53,11 @@ if q:
 
                 st.markdown(ans)
 
-                # Show ONLY source (no confidence)
                 if src:
-                    st.caption(f"**Source:** {src}")
+                    st.caption(f"🔗 **Source:** {src}")
 
             except Exception as e:
-                ans = "Sorry machi — I hit an error while answering."
                 st.error(f"Error: {e}")
+                ans = "Error"
 
     st.session_state.messages.append({"role": "assistant", "content": ans})
