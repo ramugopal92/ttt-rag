@@ -6,6 +6,7 @@ from pinecone import Pinecone
 EMBED_MODEL = "text-embedding-3-small"
 GEN_MODEL = "gpt-4o-mini"
 
+
 def _get_secret(name: str) -> str:
     # Streamlit Cloud secrets
     if name in st.secrets:
@@ -13,11 +14,14 @@ def _get_secret(name: str) -> str:
     # fallback (local)
     return os.environ.get(name, "")
 
+
 @st.cache_resource
 def _clients():
     openai_key = _get_secret("OPENAI_API_KEY")
     pinecone_key = _get_secret("PINECONE_API_KEY")
     index_name = _get_secret("PINECONE_INDEX")
+    host = _get_secret("PINECONE_HOST")
+    namespace = _get_secret("PINECONE_NAMESPACE")  # <-- NEW (ttt_v2)
 
     if not openai_key:
         raise RuntimeError("Missing OPENAI_API_KEY in Streamlit Secrets.")
@@ -25,12 +29,17 @@ def _clients():
         raise RuntimeError("Missing PINECONE_API_KEY in Streamlit Secrets.")
     if not index_name:
         raise RuntimeError("Missing PINECONE_INDEX in Streamlit Secrets.")
+    if not namespace:
+        raise RuntimeError("Missing PINECONE_NAMESPACE in Streamlit Secrets (example: ttt_v2).")
 
     oai = OpenAI(api_key=openai_key)
     pc = Pinecone(api_key=pinecone_key)
-    idx = pc.Index(index_name)
 
-    return oai, idx
+    # Serverless: host is recommended
+    idx = pc.Index(index_name, host=host) if host else pc.Index(index_name)
+
+    return oai, idx, namespace
+
 
 def answer_question(user_query: str) -> dict:
     """
@@ -41,7 +50,7 @@ def answer_question(user_query: str) -> dict:
         "confidence": 0.0-1.0 (Pinecone score)
       }
     """
-    oai, index = _clients()
+    oai, index, namespace = _clients()
 
     # 1) embed query
     q_emb = oai.embeddings.create(
@@ -49,12 +58,22 @@ def answer_question(user_query: str) -> dict:
         input=user_query
     ).data[0].embedding
 
-    # 2) retrieve
-    res = index.query(vector=q_emb, top_k=8, include_metadata=True)
+    # 2) retrieve (IMPORTANT: namespace)
+    res = index.query(
+        vector=q_emb,
+        top_k=8,
+        include_metadata=True,
+        namespace=namespace
+    )
+
     matches = res.get("matches", []) if isinstance(res, dict) else res.matches
 
     if not matches:
-        return {"answer": "I couldn't find relevant content in my sources.", "source_url": None, "confidence": 0.0}
+        return {
+            "answer": "I couldn't find relevant content in my sources.",
+            "source_url": None,
+            "confidence": 0.0
+        }
 
     # 3) build context + pick best URL
     best = matches[0]
